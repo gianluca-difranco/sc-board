@@ -1,0 +1,321 @@
+{% extends "board/base.html" %}
+
+{% block title %}Bacheca — {{ tenant_name }}{% endblock %}
+
+{% block extra_styles %}
+/* ─── Board Page Specifics ──────────────────────────── */
+
+.board-hero {
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.board-heading {
+    font-family: var(--font-brand);
+    font-size: 2.4rem;
+    color: var(--header-bg);
+    line-height: 1.1;
+}
+
+.board-heading span {
+    color: var(--header-accent);
+}
+
+.board-meta {
+    font-size: 0.85rem;
+    color: #888;
+    margin-top: 0.4rem;
+}
+
+.board-stats {
+    background: white;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    box-shadow: var(--shadow-soft);
+    font-size: 0.88rem;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-left: 4px solid var(--header-accent);
+}
+
+.board-stats strong {
+    color: var(--header-bg);
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+/* ─── Corkboard / Lavagna ───────────────────────────── */
+.corkboard {
+    background: #ffffff;
+    border-radius: 20px;
+    min-height: 500px;
+    padding: 2.5rem;
+    box-shadow:
+        inset 0 2px 8px rgba(0,0,0,0.06),
+        0 8px 40px rgba(0,0,0,0.08);
+    border: 1px solid rgba(0,0,0,0.07);
+    position: relative;
+}
+
+/* Sottile bordo decorativo stile cornice lavagna */
+.corkboard::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border-radius: 14px;
+    border: 2px dashed rgba(160, 200, 230, 0.3);
+    pointer-events: none;
+}
+
+/* ─── Griglia Post-it ───────────────────────────────── */
+.notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* ─── Singolo Post-it ───────────────────────────────── */
+.note {
+    border-radius: var(--radius-card);
+    padding: 1.4rem 1.3rem 1rem;
+    box-shadow: var(--shadow-card);
+    position: relative;
+    cursor: default;
+    transition:
+        transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.25s ease;
+    /* Leggera rotazione casuale tramite nth-child */
+    transform-origin: center top;
+}
+
+/* Rotazioni alternate per effetto post-it reale */
+.note:nth-child(5n+1) { transform: rotate(-1.5deg); }
+.note:nth-child(5n+2) { transform: rotate(1deg); }
+.note:nth-child(5n+3) { transform: rotate(-0.8deg); }
+.note:nth-child(5n+4) { transform: rotate(1.8deg); }
+.note:nth-child(5n+5) { transform: rotate(-0.5deg); }
+
+.note:hover {
+    transform: rotate(0deg) scale(1.04) translateY(-6px) !important;
+    box-shadow: var(--shadow-card-hover);
+    z-index: 10;
+}
+
+/* Spilla decorativa in cima */
+.note::before {
+    content: '📌';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.1rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+/* Pallina spilla */
+.note-pin {
+    display: none; /* Usato ::before per semplicità */
+}
+
+/* Riga colorata in cima — simula il bordo del post-it */
+.note::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    opacity: 0.7;
+}
+
+/* ─── Colori Post-it (ciclici) ──────────────────────── */
+.note-color-0  { background: var(--note-yellow);  border: 1px solid var(--note-yellow-border); }
+.note-color-0::after { background: var(--note-yellow-border); }
+
+.note-color-1  { background: var(--note-green);   border: 1px solid var(--note-green-border); }
+.note-color-1::after { background: var(--note-green-border); }
+
+.note-color-2  { background: var(--note-blue);    border: 1px solid var(--note-blue-border); }
+.note-color-2::after { background: var(--note-blue-border); }
+
+.note-color-3  { background: var(--note-pink);    border: 1px solid var(--note-pink-border); }
+.note-color-3::after { background: var(--note-pink-border); }
+
+.note-color-4  { background: var(--note-orange);  border: 1px solid var(--note-orange-border); }
+.note-color-4::after { background: var(--note-orange-border); }
+
+.note-color-5  { background: var(--note-purple);  border: 1px solid var(--note-purple-border); }
+.note-color-5::after { background: var(--note-purple-border); }
+
+/* ─── Contenuto Post-it ─────────────────────────────── */
+.note-content {
+    font-family: var(--font-note);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #2c2c2c;
+    margin-top: 0.5rem;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+.note-footer {
+    margin-top: 1rem;
+    padding-top: 0.6rem;
+    border-top: 1px dashed rgba(0,0,0,0.12);
+    font-size: 0.72rem;
+    color: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.note-date { font-style: italic; }
+
+.note-badge {
+    font-size: 0.68rem;
+    font-family: var(--font-ui);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: rgba(0,0,0,0.4);
+    text-transform: uppercase;
+}
+
+/* ─── Empty State ───────────────────────────────────── */
+.empty-state {
+    text-align: center;
+    padding: 5rem 2rem;
+    color: #aaa;
+}
+
+.empty-state .empty-icon {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+    display: block;
+    opacity: 0.5;
+}
+
+.empty-state h2 {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: #bbb;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    font-size: 0.88rem;
+}
+
+/* ─── Responsive ────────────────────────────────────── */
+@media (max-width: 600px) {
+    .notes-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+    .board-heading { font-size: 1.8rem; }
+    .corkboard { padding: 1.5rem; }
+}
+
+/* ─── Animazione di ingresso ────────────────────────── */
+@keyframes noteAppear {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9) rotate(0deg);
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.note {
+    animation: noteAppear 0.4s ease backwards;
+}
+
+/* Delay scalato per effetto cascata */
+{% for i in "0123456789" %}.notes-grid .note:nth-child({{ forloop.counter }}) { animation-delay: {{ forloop.counter0 }}00ms; }
+{% endfor %}
+.notes-grid .note:nth-child(n+11) { animation-delay: 900ms; }
+{% endblock %}
+
+{% block header %}
+<header class="site-header">
+    <div class="header-brand">
+        <div class="header-logo">⚽</div>
+        <div>
+            <div class="header-title">{{ tenant_name }}</div>
+            <div class="header-subtitle">Bacheca Messaggi</div>
+        </div>
+    </div>
+    <nav class="header-nav">
+        <span class="header-user" id="header-user-email">👤 {{ user_email }}</span>
+        <a href="{% url 'board:logout' %}" class="btn-logout" id="btn-logout">Esci</a>
+    </nav>
+</header>
+{% endblock %}
+
+{% block content %}
+<!-- Hero section -->
+<div class="board-hero">
+    <div>
+        <h1 class="board-heading">
+            📋 <span>Lavagna</span> dei Messaggi
+        </h1>
+        <p class="board-meta">
+            Comunicazioni dei Tenant Admin per la tua lega
+        </p>
+    </div>
+    <div class="board-stats" id="board-messages-count">
+        <strong>{{ messages_list|length }}</strong>
+        &nbsp;{{ messages_list|length|pluralize:"messaggio,messaggi" }} in bacheca
+    </div>
+</div>
+
+<!-- Corkboard / Lavagna -->
+<div class="corkboard" id="corkboard-area">
+    {% if messages_list %}
+    <div class="notes-grid" id="notes-grid">
+        {% for msg in messages_list %}
+        <div class="note" id="note-{{ msg.id }}">
+            <p class="note-content">{{ msg.content }}</p>
+            <div class="note-footer">
+                <span class="note-date" title="{{ msg.created_at }}">
+                    🕐
+                    {% if msg.created_at %}
+                        {{ msg.created_at|date:"d M Y, H:i" }}
+                    {% else %}
+                        Data sconosciuta
+                    {% endif %}
+                </span>
+                <span class="note-badge">TA</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state" id="empty-state">
+        <span class="empty-icon">📭</span>
+        <h2>Nessun messaggio in bacheca</h2>
+        <p>I messaggi dei Tenant Admin appariranno qui non appena verranno inviati.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Applica il colore ciclico ai post-it con JS per aggirare il limite del template tag
+    document.addEventListener('DOMContentLoaded', function() {
+        const notes = document.querySelectorAll('.notes-grid > .note');
+        const colors = ['0','1','2','3','4','5'];
+        notes.forEach(function(note, idx) {
+            // Rimuove classi di colore precedenti
+            colors.forEach(c => note.classList.remove('note-color-' + c));
+            note.classList.add('note-color-' + colors[idx % colors.length]);
+        });
+    });
+</script>
+{% endblock %}

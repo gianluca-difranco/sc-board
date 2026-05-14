@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Bacheca messaggi della tua lega fantacalcio">
+    <title>{% block title %}Bacheca{% endblock %} — FantaCalcio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Permanent+Marker&family=Kalam:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* ─── Design Tokens ─────────────────────────────────── */
+        :root {
+            --board-bg: #f8f6f0;
+            --board-lines: rgba(160, 200, 230, 0.18);
+            --header-bg: #1a1a2e;
+            --header-accent: #e94560;
+            --header-text: #ffffff;
+            --shadow-soft: 0 4px 24px rgba(0,0,0,0.10);
+            --shadow-card: 0 6px 20px rgba(0,0,0,0.13);
+            --shadow-card-hover: 0 14px 40px rgba(0,0,0,0.20);
+            --radius-card: 4px;
+            --font-ui: 'Outfit', sans-serif;
+            --font-note: 'Kalam', cursive;
+            --font-brand: 'Permanent Marker', cursive;
+
+            /* Post-it palette */
+            --note-yellow: #fff9c4;
+            --note-yellow-border: #f9e94a;
+            --note-green: #d4f7d4;
+            --note-green-border: #7ed96a;
+            --note-blue: #d0eaff;
+            --note-blue-border: #72b4f5;
+            --note-pink: #ffe0ef;
+            --note-pink-border: #f77eb3;
+            --note-orange: #ffe5cc;
+            --note-orange-border: #ffaa55;
+            --note-purple: #ead9ff;
+            --note-purple-border: #b07ef7;
+        }
+
+        /* ─── Reset & Base ──────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-ui);
+            background-color: var(--board-bg);
+            min-height: 100vh;
+            /* Sfondo lavagna con righe leggere */
+            background-image:
+                linear-gradient(var(--board-lines) 1px, transparent 1px),
+                linear-gradient(90deg, var(--board-lines) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* ─── Header ────────────────────────────────────────── */
+        .site-header {
+            background: var(--header-bg);
+            color: var(--header-text);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+            box-shadow: var(--shadow-soft);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--header-accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-family: var(--font-brand);
+            font-size: 1.6rem;
+            letter-spacing: 0.5px;
+            color: #fff;
+        }
+
+        .header-subtitle {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.55);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-weight: 400;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-user {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .btn-logout {
+            background: rgba(233,69,96,0.15);
+            border: 1px solid rgba(233,69,96,0.5);
+            color: #e94560;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-family: var(--font-ui);
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: rgba(233,69,96,0.28);
+            border-color: #e94560;
+        }
+
+        /* ─── Main Content ──────────────────────────────────── */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem;
+        }
+
+        /* ─── Flash Messages ────────────────────────────────── */
+        .flash-messages {
+            margin-bottom: 1.5rem;
+        }
+
+        .flash {
+            padding: 0.85rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .flash.error {
+            background: #ffe0e0;
+            border: 1px solid #f9a0a0;
+            color: #c0392b;
+        }
+
+        .flash.success {
+            background: #d4edda;
+            border: 1px solid #b2dfdb;
+            color: #2e7d32;
+        }
+
+        {% block extra_styles %}{% endblock %}
+    </style>
+</head>
+<body>
+    {% block header %}{% endblock %}
+
+    <main>
+        {% if messages %}
+        <div class="flash-messages">
+            {% for message in messages %}
+            <div class="flash {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
