@@ -30,8 +30,8 @@ COPY . /app/
 # Nota: Whitenoise deve essere configurato in settings.py per servirli.
 RUN python manage.py collectstatic --noinput || true
 
-# Espone la porta 8000 (quella di default per Django/Gunicorn)
-EXPOSE 8000
+# Espone la porta 8080
+EXPOSE 8080
 
 # Rendi lo script di entrypoint eseguibile
 RUN chmod +x /app/entrypoint.sh
