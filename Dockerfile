@@ -33,6 +33,8 @@ RUN python manage.py collectstatic --noinput || true
 # Espone la porta 8000 (quella di default per Django/Gunicorn)
 EXPOSE 8000
 
-# Comando per avviare l'applicazione usando Gunicorn.
-# 'bacheca_project.wsgi:application' indica il punto di ingresso WSGI definito nel progetto.
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "bacheca_project.wsgi:application"]
+# Rendi lo script di entrypoint eseguibile
+RUN chmod +x /app/entrypoint.sh
+
+# Comando per avviare l'applicazione.
+CMD ["/app/entrypoint.sh"]
