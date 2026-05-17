@@ -308,6 +308,7 @@
 
 <script>
     // Applica il colore ciclico ai post-it con JS per aggirare il limite del template tag
+    // E formatta eventuali messaggi JSON salvati precedentemente
     document.addEventListener('DOMContentLoaded', function() {
         const notes = document.querySelectorAll('.notes-grid > .note');
         const colors = ['0','1','2','3','4','5'];
@@ -315,6 +316,22 @@
             // Rimuove classi di colore precedenti
             colors.forEach(c => note.classList.remove('note-color-' + c));
             note.classList.add('note-color-' + colors[idx % colors.length]);
+
+            // Formatta il testo se è JSON
+            const contentP = note.querySelector('.note-content');
+            if (contentP) {
+                const text = contentP.textContent.trim();
+                if (text.startsWith('{') && text.endsWith('}')) {
+                    try {
+                        const parsed = JSON.parse(text);
+                        if (parsed.content) {
+                            contentP.textContent = parsed.content;
+                        }
+                    } catch (e) {
+                        // Ignora se non è un JSON valido
+                    }
+                }
+            }
         });
     });
 </script>
